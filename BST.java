@@ -1,26 +1,13 @@
 /**
  * Created by sondreberdal on 02.09.16.
  * Oblig1, INF2220
- *
- * TODO: The number of lookups that gave a positive answer
- * Time used to generate and look for similar words
- *
- *
- *
- *
  */
-
-
-
-
-
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class BST {
     private static class Node implements Comparable<Node> {
@@ -154,12 +141,11 @@ public class BST {
         }
     }
 
-    private static void displayTree(Node n){ //prints the tree from root->left-side->right-side
-        if(n != null){
-            System.out.println(n.getString());
-            displayTree(n.left);
-            displayTree(n.right);
+    private static int countNodes(Node n) {
+        if (n == null) {
+            return 0;
         }
+        return 1 + countNodes(n.left) + countNodes(n.right);
     }
 
     public ArrayList<String> similarWord(String s){
@@ -179,10 +165,10 @@ public class BST {
         String[] words1 = new String[wordArray.length]; // Same sequence as tmp ...
         String[] words2 = new String[wordArray.length*alphabet.length];
         String[] words3 = new String[(wordArray3.length)*alphabet.length];
-        String[] words4 = new String[(s.length())];
+        String[] words4 = new String[(s.length())]; // remove char
 
 
-        ArrayList<String> similarWords = new ArrayList<String>();
+        ArrayList<String> similarWords = new ArrayList<String>(); // result container
 
         int total = 0;
         int count = 0;
@@ -233,6 +219,7 @@ public class BST {
         /**
          * Need to loop once more for the last character in add one char check
          */
+
         wordArray3 = swap(wordArray.length-1, wordArray.length, wordArray3).toCharArray();
         for (int j = 0; j < alphabet.length; j++){
             tmp3 = wordArray3.clone();
@@ -245,68 +232,9 @@ public class BST {
             }
             total++;
         }
-
+        Collections.sort(similarWords);
         return similarWords;
     }
-
-/*    public String[] switchOneChar(String s){
-
-        char[] wordArray = s.toCharArray();
-        char[] tmp;
-
-        char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-
-        String[] words = new String[wordArray.length*alphabet.length];
-        int total = 0;
-        for (int i = 0; i < wordArray.length; i++){
-            for (int j = 0; j < alphabet.length; j++){
-                tmp = wordArray.clone();
-                tmp[i] = alphabet[j];
-                String tmp_str = new String(tmp);
-                words[total] = tmp_str;
-                total++;
-            }
-        }
-        return words;
-    } */
-
-    /*public String[] addOneChar(String s){
-
-        char[] wordArray = new char[s.length()+1];
-        wordArray[0] = 'a';
-        System.arraycopy(s.toCharArray(),0,wordArray,1,s.length());
-        char[] tmp;
-
-        char[] alphabet = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-
-        String[] words = new String[(wordArray.length+1)*alphabet.length];
-        int total = 0;
-        for (int i = 0; i < wordArray.length; i++){
-            if(i != 0){
-                wordArray = swap(i-1, i, wordArray).toCharArray();
-            }
-            for (int j = 0; j < alphabet.length; j++){
-                tmp = wordArray.clone();
-                tmp[i] = alphabet[j];
-                String tmp_str = new String(tmp);
-                words[total] = tmp_str;
-                total++;
-            }
-        }
-        return words;
-    } */
-    /*
-    public String[] removeOneChar(String s){
-
-        String[] words = new String[(s.length())];
-
-        for (int i = 0; i < s.length(); i++){
-            String tmp;
-            words[i] = tmp = s.substring(0,i) + s.substring(i+1);
-            System.out.println(tmp);
-        }
-        return words;
-    } */
 
     public String swap(int a, int b, char[] word){
         char tmp = word[a];
@@ -327,25 +255,21 @@ public class BST {
         return res;
     }
 
-    public void printStats(){
-    /*    Upon exiting the program it should output the following statistics about the binary
-        search tree:
-    The depth of the tree (length of the path to the node furthest away from the root)
-    How many nodes are there for each depth of the tree.
-    The average depth of all the nodes.
-    The alphabetically first and last word of the dictionary
 
-    */
+
+    public void printStats(){
+
+        System.out.println("*** TREE STATISTICS ***");
         // print depth
 
         System.out.println("The depth of the tree was: "+ findDepth(root));
 
         // print how many nodes for c depth of the tree
-        //Todo
+        System.out.println("There were "+countNodes(root)/findDepth(root)+" nodes for each depth of tree" );
+
 
         // print the average depth of all the nodes
-        //Todo
-
+        System.out.println("The average depth for all the nodes were: "+sumDepthOfAllChildren(root, 0)/countNodes(root));
 
         // last and first alphabetically:
 
@@ -354,14 +278,22 @@ public class BST {
 
     }
 
+    public int sumDepthOfAllChildren(Node node, int depth)
+    {
+        if ( node == null )
+            return 0;  // starting to see a pattern?
+        return depth + sumDepthOfAllChildren(node.left, depth + 1) +
+                sumDepthOfAllChildren(node.right, depth + 1);
+    }
+
     public static void main(String[] args){
 
-        System.out.println(".. Booting up simple dictionary .. ");
+        System.out.println("*** Booting up simple dictionary ***");
         BST bst = new BST();
 
         if(args.length < 1) {
             System.out.println("No input file provided");
-            System.out.println(".. do you want to continue with the default dictionary.txt file? ..");
+            System.out.println("*** do you want to continue with the default dictionary.txt file? ***");
             System.out.println("Enter Y/N:");
 
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -386,22 +318,19 @@ public class BST {
                         case "no":
                             quit();
                         default:
-                            System.out.println(".. Invalid input, please enter a valid input: Y/N ..");
+                            System.out.println("*** Invalid input, please enter a valid input: Y/N ***");
                             System.out.print("Enter Y/N: ");
                             break;
                     }
                 }
             }catch(IOException e){ e.printStackTrace();}
             bst.readFile("dictionary.txt");
+            bst.remove("busybody",root);
+            bst.insert("busybody",root);
         } else {
             bst.readFile(args[0]);
-        }
-        //display(root);
-        //displayTree(root);
-        //System.out.println(bst.findMax(root).getString());
-        //System.out.println(bst.findMin(root).getString());
 
-
+        } // read file
 
         printMenu();
         try {
@@ -413,28 +342,44 @@ public class BST {
                 switch(input){
                     case("q"): run = false; break;
                     case("help"):case("h"): printMenu(); break;
-                    case("insert"): break;
+                    case("insert"):
+                        System.out.println("Enter word you want to insert:");
+                        input = br.readLine().toLowerCase();
+                        bst.insert(input, root);
+                        break;
                     case("search"):case("s"):
                         System.out.println("Enter search word:");
-                        input = br.readLine();
+                        input = br.readLine().toLowerCase();
                         if(!bst.contains(input, root)){
                             System.out.println("Could not find word in the dictionary ...");
                             System.out.println("Looking for similar suggestions ...");
-                            bst.similarWord(input);
-
-                            /*if(suggestions.size() > 0) {
+                            ArrayList<String> resultList = new ArrayList<String>();
+                            long startTime = System.currentTimeMillis();
+                            resultList = bst.similarWord(input);
+                            long timeElapsed = (System.currentTimeMillis() - startTime);
+                            if(resultList.size() > 0) {
                                 System.out.println("Found suggestion(s):");
-                                for (int i = 0; i < suggestions.size(); i++) {
-                             //       System.out.println(suggestions.get(i));
+                                for (int i = 0; i < resultList.size(); i++) {
+                                    System.out.println(resultList.get(i));
                                 }
+                                System.out.println("Lookups that gave a positive answer: "+resultList.size());
+                                System.out.println("Time used to generate and look for similar words: "+
+                                        timeElapsed+" milliseconds");
                             } else{
                                 System.out.println("Couldn't find any suggestions in the dictionary :( ...");
-                            } */
+                                System.out.println("Time used to generate and look for similar words: "+
+                                        timeElapsed+" milliseconds");
+                            }
                         }
                         break;
-                    case("delete"): break;
+                    case("delete"):
+                        System.out.println("Enter word you want to delete:");
+                        input = br.readLine().toLowerCase();
+
+                        bst.remove(input, root);
+                        break;
                     default:
-                        System.out.println(".. Invalid input, note that the program is case sensitive ..");
+                        System.out.println("*** Invalid input, note that the program is case sensitive ***");
                         break;
                 }
             }
@@ -445,13 +390,13 @@ public class BST {
     } // Main
 
     static void quit(){
-        System.out.println(".. Exiting simple dictionary, good bye! :) ..");
+        System.out.println("*** Exiting simple dictionary, good bye! :) ***");
         System.exit(0);
     }
 
     static void printMenu(){
         System.out.println("| ----------MENU---------- |");
-        System.out.println("| .. Available commands .. |");
+        System.out.println("|*** Available commands ***|");
         System.out.println("| help/h: This menu        |");
         System.out.println("| insert: Insert to tree   |");
         System.out.println("| search: Search in tree   |");
